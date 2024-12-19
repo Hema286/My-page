@@ -1,0 +1,53 @@
+name: CI/CD for Welcome Page
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js (for testing)
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Lint the HTML file
+      run: |
+        # Run a basic linter for HTML
+        npx htmlhint index.html
+
+    - name: Run tests
+      run: |
+        # For simplicity, just check if the file exists
+        if [ ! -f "index.html" ]; then
+          echo "index.html not found!" && exit 1
+        else
+          echo "index.html found!"
+        fi
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.0.0
+      with:
+        branch: gh-pages
+        folder: .
+        clean: true
